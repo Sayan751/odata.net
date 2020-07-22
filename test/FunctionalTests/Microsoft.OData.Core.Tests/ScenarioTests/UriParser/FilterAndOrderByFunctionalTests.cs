@@ -1853,6 +1853,16 @@ namespace Microsoft.OData.Tests.ScenarioTests.UriParser
             Assert.Equal("ID", Assert.IsType<SingleValuePropertyAccessNode>(inNode.Left).Property.Name);
             Assert.Equal("RelatedIDs", Assert.IsType<CollectionPropertyAccessNode>(inNode.Right).Property.Name);
         }
+        
+        [Fact]
+        public void FilterWithNotInOperationWithPrimitiveTypeProperties()
+        {
+            FilterClause filter = ParseFilter("not(ID in RelatedIDs)", HardCodedTestModel.TestModel, HardCodedTestModel.GetPersonType());
+            UnaryOperatorNode notNode = Assert.IsType<UnaryOperatorNode>(filter.Expression);
+            InNode inNode = Assert.IsType<InNode>(notNode.Operand);
+            Assert.Equal("ID", Assert.IsType<SingleValuePropertyAccessNode>(inNode.Left).Property.Name);
+            Assert.Equal("RelatedIDs", Assert.IsType<CollectionPropertyAccessNode>(inNode.Right).Property.Name);
+        }
 
         [Fact]
         public void FilterWithInOperationWithIntConstant()
@@ -2359,6 +2369,16 @@ namespace Microsoft.OData.Tests.ScenarioTests.UriParser
         {
             OrderByClause orderby = ParseOrderBy("ID in (1,2,3)", HardCodedTestModel.TestModel, HardCodedTestModel.GetPersonType());
             var inNode = Assert.IsType<InNode>(orderby.Expression);
+            Assert.Equal("ID", Assert.IsType<SingleValuePropertyAccessNode>(inNode.Left).Property.Name);
+            Assert.Equal("(1,2,3)", Assert.IsType<CollectionConstantNode>(inNode.Right).LiteralText);
+        }
+
+        [Fact]
+        public void OrderByWithNotInOperationWithParensCollection()
+        {
+            OrderByClause orderby = ParseOrderBy("not(ID in (1,2,3))", HardCodedTestModel.TestModel, HardCodedTestModel.GetPersonType());
+            var notNode = Assert.IsType<UnaryOperatorNode>(orderby.Expression);
+            var inNode = Assert.IsType<InNode>(notNode.Operand);
             Assert.Equal("ID", Assert.IsType<SingleValuePropertyAccessNode>(inNode.Left).Property.Name);
             Assert.Equal("(1,2,3)", Assert.IsType<CollectionConstantNode>(inNode.Right).LiteralText);
         }
